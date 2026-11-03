@@ -23,28 +23,112 @@
 <body>
   <!-- <iframe src="https://script.google.com/a/~/macros/s/AKfycbyeP97khgj8h9ZwS2hzVcwZMDgAe1OgeAP8hPae-QoAhI3KgHgw7vyYE-iEUj-LCL-26g/exec"></iframe> -->
 
-  <h1 style="
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    font-size: 3rem;
-    font-weight: 800;
-    text-align: center;
-    background: linear-gradient(45deg, #00f2fe, #4facfe);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-transform: uppercase;
-    letter-spacing: 4px;
-    padding: 20px;
-    animation: pulse 2s infinite ease-in-out;
-">
-    Web Sedang Diproses
-</h1>
+ <div style="text-align: center; font-family: 'Segoe UI', Roboto, sans-serif; padding: 40px 20px;">
+    
+    <!-- TEKS ELIT (Glow & Pulse) -->
+    <h1 style="
+        font-size: 3.5rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        background: linear-gradient(45deg, #00f2fe, #4facfe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        animation: pulse 2s infinite ease-in-out;
+    ">
+        Web Sedang Diproses
+    </h1>
 
-<!-- Kode CSS Animasi (Tempel di bagian bawah atau file CSS) -->
+    <!-- ANIMASI LUCU: Komputer Coding Panik -->
+    <div class="funny-loader">
+        <div class="monitor">
+            <div class="code-line"></div>
+            <div class="code-line"></div>
+            <div class="code-line"></div>
+        </div>
+        <div class="keyboard"></div>
+    </div>
+    
+    <p style="color: #a0aec0; font-size: 1.1rem; letter-spacing: 1px; margin-top: 15px;">
+        Mohon tunggu, developer kami sedang ngopi dan coding...
+    </p>
+</div>
+
+<!-- ================= STYLE & ANIMASI (LOOPING) ================= -->
 <style>
+/* Animasi berdenyut untuk Teks H1 */
 @keyframes pulse {
-    0% { transform: scale(0.98); opacity: 0.8; }
-    50% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 15px rgba(79, 172, 254, 0.6)); }
-    100% { transform: scale(0.98); opacity: 0.8; }
+    0%, 100% { transform: scale(0.98); opacity: 0.9; }
+    50% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 15px rgba(79, 172, 254, 0.5)); }
+}
+
+/* Wadah Animasi Lucu */
+.funny-loader {
+    display: inline-block;
+    margin: 30px auto;
+    position: relative;
+    animation: bounce 0.6s infinite alternate ease-in-out; /* Efek melompat lucu */
+}
+
+/* Desain Monitor */
+.monitor {
+    width: 60px;
+    height: 45px;
+    background: #1a202c;
+    border: 3px solid #4facfe;
+    border-radius: 6px;
+    padding: 6px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 0 15px rgba(79, 172, 254, 0.4);
+}
+
+/* Baris Kode di Dalam Monitor */
+.code-line {
+    height: 4px;
+    background: #00f2fe;
+    border-radius: 2px;
+    width: 0;
+    animation: writeCode 1.5s infinite linear;
+}
+.code-line:nth-child(2) { animation-delay: 0.3s; background: #9f7aea; }
+.code-line:nth-child(3) { animation-delay: 0.6s; width: 60%; background: #48bb78; }
+
+/* Desain Keyboard */
+.keyboard {
+    width: 40px;
+    height: 6px;
+    background: #4facfe;
+    margin: 4px auto 0;
+    border-radius: 0 0 4px 4px;
+    position: relative;
+}
+.keyboard::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 17px;
+    width: 6px;
+    height: 4px;
+    background: #4facfe;
+}
+
+/* ANIMASI LOOPING */
+
+/* 1. Efek Komputer Melompat Lucu */
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10px); }
+}
+
+/* 2. Efek Mengetik Kode Otomatis */
+@keyframes writeCode {
+    0% { width: 0%; }
+    50% { width: 100%; }
+    100% { width: 0%; }
 }
 </style>
 </body>
