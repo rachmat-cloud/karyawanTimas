@@ -1,203 +1,83 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ID Card Karyawan Timas</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: #0b0f19;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a5c36">
+<title>ID Card</title>
+<style>
+html,body{margin:0;height:100%;background:#f3f5f7;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f3f5f7}
+#ld{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#6b7280;font-size:14px;text-align:center;padding:20px}
+#ld.hide{display:none}
+.spn{width:34px;height:34px;border:4px solid #cfe5d9;border-top-color:#0a5c36;border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#err{display:none;color:#b30000;font-weight:700;line-height:1.5}
+#err button{margin-top:10px;font:inherit;font-weight:700;padding:10px 18px;border:0;border-radius:10px;background:#0a5c36;color:#fff;cursor:pointer}
+</style>
 </head>
 <body>
-  <iframe src="https://script.google.com/a/~/macros/s/AKfycbzFMg8zp1kSeBGU68TjTIhLI6afcFw41DiceM9hzHnytSrR3bQ6eJfDcnkUnCh-Nr2RzA/exec"></iframe>
 
- <!-- <div style="text-align: center; font-family: 'Segoe UI', Roboto, sans-serif; padding: 40px 20px;">
-    
-    <!-- TANDA GAWAT DARURAT (Emergency Warning Sign) -->
-    <div class="emergency-box">
-        <div class="warning-icon">⚠</div>
-        <span class="warning-text">SYSTEM STATUS: MAINTENANCE</span>
-    </div>
-
-    <!-- TEKS UTAMA (Fresh Neon Gradient) -->
-    <h1 style="
-        font-size: 3.5rem;
-        font-weight: 900;
-        margin: 20px 0 10px;
-        background: linear-gradient(45deg, #00ff87, #60efff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-transform: uppercase;
-        letter-spacing: 4px;
-        animation: pulse-glow 2s infinite ease-in-out;
-    ">
-        Web Sedang Diproses
-    </h1>
-
-    <!-- ANIMASI LOOPING (Komputer Panik + Lampu Sirine) -->
-    <div class="funny-loader">
-        <div class="siren-light"></div>
-        <div class="monitor">
-            <div class="code-line"></div>
-            <div class="code-line"></div>
-            <div class="code-line"></div>
-        </div>
-        <div class="keyboard"></div>
-    </div>
-    
-    <p style="color: #cbd5e1; font-size: 1.1rem; letter-spacing: 1px; margin-top: 15px; font-weight: 500;">
-        Terjadi pembaruan massal! Tim developer sedang mengendalikan situasi ☕⚡
-    </p>
+<div id="ld">
+  <div class="spn" id="spn"></div>
+  <div id="msg">Memuat data...</div>
+  <div id="err">Tidak dapat memuat aplikasi.<br><button onclick="location.reload()">Coba lagi</button></div>
 </div>
+<iframe id="app" title="ID Card" allow="clipboard-write; fullscreen"></iframe>
 
-<!-- ================= STYLE & ANIMASI (LOOPING) ================= -->
-<style>
-/* Container Tanda Gawat Darurat */
-.emergency-box {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(255, 71, 87, 0.1);
-    border: 2px solid #ff4757;
-    padding: 8px 20px;
-    border-radius: 30px;
-    box-shadow: 0 0 15px rgba(255, 71, 87, 0.3);
-    animation: blink-border 1s infinite alternate;
+<script>
+/* ============ ISI BAGIAN INI ============ */
+
+/* WAJIB (sekali): URL Web app dari Apps Script (Deploy > Manage deployments), berakhiran /exec.
+   Bentuknya: https://script.google.com/macros/s/XXXX/exec  (TANPA /a/~/ atau /a/domain/) */
+var GAS_URL = "https://script.google.com/macros/s/AKfycbyXtCULjDXFneXGN2af7rl-QDTSNSQHlRPblZvYA_yTigourWlriFGV7Jncg_QxLRvH2g/exec";
+
+/* OPSIONAL (hanya jika suatu hari kamu membuat deployment BARU dan ingin GitHub ikut otomatis):
+   link CSV dari tab "Config" (File > Share > Publish to web > tab Config > CSV).
+   Kosongkan "" kalau tidak dipakai. */
+var CSV_URL = "";
+
+/* ============ SELESAI ============ */
+
+function withTimeout(p, ms) {
+  return Promise.race([p, new Promise(function (_, rej) { setTimeout(function () { rej(new Error("timeout")); }, ms); })]);
+}
+function fromCsv() {
+  var u = CSV_URL + (CSV_URL.indexOf("?") > -1 ? "&" : "?") + "t=" + Date.now();
+  return withTimeout(fetch(u, { cache: "no-store" }), 8000)
+    .then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.text(); })
+    .then(function (t) {
+      var m = t.match(/https:\/\/script\.google\.com\/[^\s",]+/);
+      if (!m) throw new Error("url tidak ada");
+      return m[0];
+    });
+}
+function cached() { try { return localStorage.getItem("gasUrl") || ""; } catch (e) { return ""; } }
+function remember(u) { try { localStorage.setItem("gasUrl", u); } catch (e) {} }
+function valid(u) { return /^https:\/\/script\.google\.com\//.test(u || ""); }
+
+function openApp(url) {
+  var f = document.getElementById("app");
+  f.addEventListener("load", function () { document.getElementById("ld").classList.add("hide"); });
+  /* teruskan parameter dari QR (?id=...) dan ?page=... ke web app */
+  f.src = url + (location.search || "");
+}
+function fail() {
+  document.getElementById("spn").style.display = "none";
+  document.getElementById("msg").style.display = "none";
+  document.getElementById("err").style.display = "block";
+}
+function fallback() {
+  var u = cached();
+  if (!valid(u)) u = GAS_URL;
+  if (valid(u)) openApp(u); else fail();
 }
 
-.warning-icon {
-    color: #ff4757;
-    font-size: 1.4rem;
-    font-weight: bold;
-    animation: vibrate 0.2s infinite;
+if (/^https?:\/\//.test(CSV_URL)) {
+  fromCsv().then(function (u) { remember(u); openApp(u); }).catch(fallback);
+} else {
+  if (valid(GAS_URL)) { remember(GAS_URL); openApp(GAS_URL); } else fail();
 }
-
-.warning-text {
-    color: #ff4757;
-    font-size: 0.9rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-}
-
-/* Animasi Berdenyut untuk Teks Utama */
-@keyframes pulse-glow {
-    0%, 100% { transform: scale(0.98); filter: drop-shadow(0 0 10px rgba(0, 255, 135, 0.3)); }
-    50% { transform: scale(1); filter: drop-shadow(0 0 25px rgba(96, 239, 255, 0.7)); }
-}
-
-/* Container Animasi Lucu */
-.funny-loader {
-    display: inline-block;
-    margin: 40px auto 20px;
-    position: relative;
-    animation: bounce 0.5s infinite alternate ease-in-out;
-}
-
-/* Lampu Emergency Sirine Mini di Atas Komputer */
-.siren-light {
-    width: 14px;
-    height: 10px;
-    background: #ff4757;
-    border-radius: 10px 10px 0 0;
-    margin: 0 auto -2px;
-    box-shadow: 0 0 20px #ff4757;
-    animation: siren-flash 0.4s infinite alternate;
-}
-
-/* Desain Monitor Fresh Cyberpunk */
-.monitor {
-    width: 65px;
-    height: 48px;
-    background: #0f172a;
-    border: 3px solid #00ff87;
-    border-radius: 8px;
-    padding: 6px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    box-shadow: 0 0 20px rgba(0, 255, 135, 0.3);
-}
-
-/* Baris Kode di Dalam Monitor */
-.code-line {
-    height: 4px;
-    background: #60efff;
-    border-radius: 2px;
-    width: 0;
-    animation: writeCode 1.2s infinite linear;
-}
-.code-line:nth-child(2) { animation-delay: 0.2s; background: #ff4757; }
-.code-line:nth-child(3) { animation-delay: 0.4s; width: 50%; background: #00ff87; }
-
-/* Desain Keyboard */
-.keyboard {
-    width: 44px;
-    height: 6px;
-    background: #00ff87;
-    margin: 4px auto 0;
-    border-radius: 0 0 4px 4px;
-    position: relative;
-}
-.keyboard::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: 19px;
-    width: 6px;
-    height: 4px;
-    background: #00ff87;
-}
-
-/* ================= KEYFRAMES ANIMASI ================= */
-
-/* Border Kotak Gawat Darurat Berkedip */
-@keyframes blink-border {
-    from { border-color: #ff4757; box-shadow: 0 0 5px rgba(255, 71, 87, 0.2); }
-    to { border-color: #ff6b81; box-shadow: 0 0 20px rgba(255, 71, 87, 0.6); background: rgba(255, 71, 87, 0.2); }
-}
-
-/* Tanda Seru Bergetar */
-@keyframes vibrate {
-    0% { transform: translate(0, 0); }
-    20% { transform: translate(-1px, 1px); }
-    40% { transform: translate(-1px, -1px); }
-    60% { transform: translate(1px, 1px); }
-    80% { transform: translate(1px, -1px); }
-    100% { transform: translate(0, 0); }
-}
-
-/* Sirine Berkedip Cepat */
-@keyframes siren-flash {
-    from { background: #ff4757; box-shadow: 0 0 5px #ff4757; }
-    to { background: #ff0000; box-shadow: 0 0 25px #ff0000, 0 0 40px #ff4757; }
-}
-
-/* Komputer Melompat */
-@keyframes bounce {
-    from { transform: translateY(0); }
-    to { transform: translateY(-12px); }
-}
-
-/* Mengetik Kode */
-@keyframes writeCode {
-    0% { width: 0%; }
-    50% { width: 100%; }
-    100% { width: 0%; }
-}
-</style> -->
-
+</script>
 </body>
 </html>
